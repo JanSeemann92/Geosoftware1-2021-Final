@@ -1,4 +1,4 @@
-import { useHistory } from "react-router";
+import { useHistory, useLocation, Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBarMui from "@material-ui/core/AppBar";
 import Box from "@material-ui/core/Box";
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 const headerImage = `${process.env.PUBLIC_URL}/images/ampcontrol-white.png`;
 
 export const AppBar = () => {
-  const history = useHistory();
+  const location = useLocation();
   const classes = useStyles();
 
   return (
@@ -41,9 +41,14 @@ export const AppBar = () => {
           </Box>
         </Grid>
         <Grid item className={classes.menu}>
-          <Tabs value={0} aria-label="simple tabs example">
-            <Tab label="Stadttouren" />
-            <Tab label="Sehenswürdigkeiten" />
+          <Tabs value={location.pathname} aria-label="navigation">
+            <Tab label="Stadttouren" value="/" component={Link} to="/" />
+            <Tab
+              label="Sehenswürdigkeiten"
+              value="/sights"
+              component={Link}
+              to="/sights"
+            />
           </Tabs>
         </Grid>
       </Grid>

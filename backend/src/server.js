@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const MongoClient = require("mongodb").MongoClient;
 const { v4: uuidv4 } = require("uuid");
@@ -11,6 +12,7 @@ const EXPRESS_PORT = process.env.EXPRESS_PORT;
 const app = express();
 // Set file size limit to 5mb
 app.use(bodyParser.json({ limit: "5mb", type: "application/json" }));
+app.use(cors());
 
 let db;
 const start = async () => {
@@ -97,7 +99,7 @@ app.get("/sights/:id", async (req, res) => {
   const { id } = req.params;
   const result = await db.collection("sights").findOne({ id });
   console.log(result);
-  res.json(convertDBToGeoJSON(sight));
+  res.json(convertDBToGeoJSON(result));
 });
 
 app.delete("/sights/:id", async (req, res) => {
