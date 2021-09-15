@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { api } from "common/api";
 
@@ -13,6 +14,11 @@ export const TourList = () => {
 
   return (
     <Box m={2}>
+      <Box mb={2} textAlign="right">
+        <Button component={Link} to="/tours/create" variant="contained">
+          Hinzufügen
+        </Button>
+      </Box>
       <Grid container direction="column" spacing={1}>
         {Array.isArray(tours) &&
           tours.map((tour, key) => (

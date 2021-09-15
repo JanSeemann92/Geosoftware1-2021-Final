@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { useQuery } from "react-query";
 import { useFormik } from "formik";
@@ -10,10 +10,14 @@ import TextField from "@material-ui/core/TextField";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Button from "@material-ui/core/Button";
 import { api } from "common/api";
+import { useMap } from "map";
 
 export const SightForm = () => {
   const { id: sightId } = useParams();
   const history = useHistory();
+  const { map, drawControl } = useMap();
+
+  const drawnItems = useRef(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -52,16 +56,28 @@ export const SightForm = () => {
         name: "",
         description: "",
       },
+      geometry: null,
     },
     onSubmit,
   });
 
   useEffect(() => {
+    if (!drawnItems.current && map) {
+      drawnItems.current = new window.L.FeatureGroup();
+      map.addLayer(drawnItems.current);
+    }
+
     if (sight && formik.values.properties?.id !== sight.properties?.id) {
       // set current charge point data
       formik.setValues(sight);
+
+      if (sight.geometry) {
+        const geoJsonLayer = window.L.geoJson(sight.geometry);
+        drawnItems.current.addLayer(geoJsonLayer);
+        map.fitBounds(drawnItems.current.getBounds(), { maxZoom: 17 });
+      }
     }
-  }, [formik, sight]);
+  }, [formik, sight, map]);
 
   const extractWikipediaSummary = async (e) => {
     const { value } = e.target;
@@ -95,6 +111,47 @@ export const SightForm = () => {
       console.error("Unable to delete sight:", err);
     }
     setLoading(false);
+  };
+
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+    map.on("draw:created", function (event) {
+      const { layer } = event;
+      const { geometry } = layer.toGeoJSON();
+
+      // add to map
+      drawnItems.current.addLayer(layer);
+      // add to formik
+      formik.setFieldValue("geometry", geometry);
+    });
+  }, [map, formik]);
+
+  useEffect(() => {
+    return () => {
+      if (map) {
+        map.removeLayer(drawnItems.current);
+      }
+    };
+  }, [map]);
+
+  const drawMarker = () => {
+    if (!map) {
+      return;
+    }
+    drawnItems.current.clearLayers();
+
+    new window.L.Draw.Marker(map, drawControl.options.marker).enable();
+  };
+
+  const drawPolygon = () => {
+    if (!map) {
+      return;
+    }
+    drawnItems.current.clearLayers();
+
+    new window.L.Draw.Polygon(map, drawControl.options.polygon).enable();
   };
 
   return (
@@ -140,6 +197,24 @@ export const SightForm = () => {
               value={formik.values?.properties?.description || ""}
               onChange={formik.handleChange}
             />
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              type="button"
+              variant="contained"
+              color="secondary"
+              onClick={drawMarker}
+            >
+              Marker
+            </Button>
+            <Button
+              type="button"
+              variant="contained"
+              color="secondary"
+              onClick={drawPolygon}
+            >
+              Polygon
+            </Button>
           </Grid>
           <Grid item xs={12}>
             {isEdit ? (
