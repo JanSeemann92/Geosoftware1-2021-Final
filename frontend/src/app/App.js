@@ -1,7 +1,8 @@
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import { SightList } from "../sight";
+import { TourRoutes } from "../tour";
+import { SightRoutes } from "../sight";
 import { AppBar } from "./AppBar";
 import { Map } from "map";
 
@@ -32,8 +33,11 @@ export const App = () => {
         <Grid item xs={4}>
           <div className={classes.scroll}>
             <Switch>
+              <Route path="/sights">
+                <SightRoutes />
+              </Route>
               <Route path="/">
-                <SightList />
+                <TourRoutes />
               </Route>
             </Switch>
           </div>
