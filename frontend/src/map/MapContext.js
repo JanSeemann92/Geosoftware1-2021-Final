@@ -20,6 +20,7 @@ export const MapProvider = ({ children }) => {
   const [map, setMapRaw] = useState(null);
   const [drawControl, setDrawControlRaw] = useState(null);
   const drawnItems = useRef(null);
+  const [popup, setPopupRaw] = useState(null);
 
   const setMap = useCallback((ref) => {
     if (!ref) {
@@ -56,17 +57,26 @@ export const MapProvider = ({ children }) => {
     };
   }, [map]);
 
+  const setPopup = useCallback(
+    (data) => {
+      setPopupRaw(data);
+    },
+    [setPopupRaw]
+  );
+
   // memoize provider value to prevent unnecessary re-renderings
   const value = useMemo(
     () => ({
       setMap,
       cleanupMap,
+      setPopup,
       map: map,
       drawControl: drawControl,
+      popup,
     }),
-    [setMap, cleanupMap, map, drawControl]
+    [setMap, cleanupMap, setPopup, map, drawControl, popup]
   );
-  console.log(value);
+
   return <MapContext.Provider value={value}>{children}</MapContext.Provider>;
 };
 
