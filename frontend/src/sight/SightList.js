@@ -7,14 +7,15 @@ import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { api } from "common/api";
-import { useMap } from "map";
+import { useSightsOnMap } from "map/hooks";
 
 export const SightList = () => {
-  const { map } = useMap();
-  const mapLayer = useRef(null);
-  const mapSights = useRef({});
+  const { highlightSightOnMap, resetHighlightSightOnMap, setSights } =
+    useSightsOnMap();
 
-  const { data: sightsResponse } = useQuery("sights", () => api.get("/sights"));
+  const { data: sightsResponse } = useQuery(["sights"], () =>
+    api.get("/sights")
+  );
 
   const sights = useMemo(
     () => sightsResponse?.data || [],
@@ -22,43 +23,8 @@ export const SightList = () => {
   );
 
   useEffect(() => {
-    if (!mapLayer.current && map) {
-      mapLayer.current = new window.L.FeatureGroup();
-      map.addLayer(mapLayer.current);
-    }
-    return () => {
-      if (map) {
-        map.removeLayer(mapLayer.current);
-      }
-    };
-  }, [map]);
-
-  useEffect(() => {
-    if (Array.isArray(sights) && sights.length > 0 && mapLayer.current) {
-      mapLayer.current.clearLayers();
-      mapSights.current = {};
-      sights.forEach((sight) => {
-        mapSights.current[sight.properties.id] = window.L.geoJson(
-          sight.geometry,
-          { style: { color: "blue" } }
-        );
-        mapLayer.current.addLayer(mapSights.current[sight.properties.id]);
-      });
-      map.fitBounds(mapLayer.current.getBounds());
-    }
-  }, [sights, map]);
-
-  const highlightSightOnMap = useCallback((id) => {
-    if (mapSights.current[id]) {
-      mapSights.current[id].setStyle({ color: "red" });
-    }
-  }, []);
-
-  const resetHighlightSightOnMap = useCallback((id) => {
-    if (mapSights.current[id]) {
-      mapSights.current[id].setStyle({ color: "blue" });
-    }
-  }, []);
+    setSights(sights);
+  }, [setSights, sights]);
 
   return (
     <Box m={2}>
