@@ -19,13 +19,45 @@ export const TourList = () => {
           Hinzufügen
         </Button>
       </Box>
-      <Grid container direction="column" spacing={1}>
+      <Grid container direction="column" spacing={2}>
         {Array.isArray(tours) &&
           tours.map((tour, key) => (
             <Grid key={key} item>
               <Box p={1} component={Paper}>
                 <Typography variant="h6">{tour.name || "..."}</Typography>
-                <Link to={`/tours/${tour.id}/edit`}>Edit</Link>
+                <Grid container alignItems="center">
+                  <Grid item style={{ flex: 1 }}>
+                    {tour?.sights?.length || "0"} Sehenswürdigkeit
+                    {tour?.sights?.length > 1 ? "en" : ""}
+                  </Grid>
+                  <Grid item>
+                    <Box width="100%" mt={1} textAlign="right">
+                      <Grid container spacing={1}>
+                        <Grid item>
+                          <Link
+                            component={Button}
+                            to={`/tours/${tour.id}/edit`}
+                            aria-label="edit sight"
+                            variant="outlined"
+                          >
+                            Bearbeiten
+                          </Link>
+                        </Grid>
+                        <Grid item>
+                          <Link
+                            component={Button}
+                            to={`/tours/${tour.id}`}
+                            aria-label="show tour details"
+                            variant="contained"
+                            color="secondary"
+                          >
+                            Details
+                          </Link>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Grid>
+                </Grid>
               </Box>
             </Grid>
           ))}

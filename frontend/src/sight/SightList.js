@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import Paper from "@material-ui/core/Paper";
@@ -6,8 +6,11 @@ import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import LinkMUI from "@material-ui/core/Link";
 import { api } from "common/api";
 import { useSightsOnMap } from "map/hooks";
+import { TruncateText } from "component";
+import { SightTile } from "./component";
 
 export const SightList = () => {
   const { highlightSightOnMap, resetHighlightSightOnMap, setSights } =
@@ -33,7 +36,7 @@ export const SightList = () => {
           Hinzufügen
         </Button>
       </Box>
-      <Grid container direction="column" spacing={1}>
+      <Grid container direction="column" spacing={2}>
         {Array.isArray(sights) &&
           sights.map((sight, key) => (
             <Grid
@@ -42,18 +45,7 @@ export const SightList = () => {
               onMouseEnter={() => highlightSightOnMap(sight.properties.id)}
               onMouseLeave={() => resetHighlightSightOnMap(sight.properties.id)}
             >
-              <Box p={1} component={Paper}>
-                <Typography variant="h6">
-                  {sight.properties.name || "..."}
-                </Typography>
-                <Typography variant="body2">
-                  {sight.properties?.url || ""}
-                </Typography>
-                <Typography variant="body2">
-                  {sight.properties?.description || ""}
-                </Typography>
-                <Link to={`/sights/${sight.properties.id}/edit`}>Edit</Link>
-              </Box>
+              <SightTile sight={sight} />
             </Grid>
           ))}
       </Grid>
