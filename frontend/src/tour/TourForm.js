@@ -21,6 +21,7 @@ export const TourForm = () => {
   const history = useHistory();
 
   const [loading, setLoading] = useState(false);
+  const [showConfirmDeletion, setShowConfirmDeletion] = useState(false);
 
   const { data: tourResponse, refetch } = useQuery(
     ["tours", tourId],
@@ -34,6 +35,7 @@ export const TourForm = () => {
   const onSubmit = useCallback(
     async (values) => {
       setLoading(true);
+      values.sights = (values.sights || []).filter(Boolean);
       try {
         if (isEdit) {
           await api.put("/tours", values);
@@ -53,6 +55,7 @@ export const TourForm = () => {
   const formik = useFormik({
     initialValues: {
       name: "",
+      sights: [],
     },
     onSubmit,
   });
@@ -108,25 +111,56 @@ export const TourForm = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            {isEdit ? (
-              <Button
-                disabled={loading}
-                variant="contained"
-                color="secondary"
-                startIcon={<DeleteIcon />}
-                onClick={onDelete}
-              >
-                Delete
-              </Button>
-            ) : null}
-            <Button
-              disabled={loading}
-              type="submit"
-              variant="contained"
-              color="primary"
-            >
-              Speichern
-            </Button>
+            <Box mt={2}>
+              <Grid container spacing={1}>
+                {showConfirmDeletion ? (
+                  <>
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        onClick={() => setShowConfirmDeletion(false)}
+                      >
+                        Abbrechen
+                      </Button>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<DeleteIcon />}
+                        onClick={onDelete}
+                      >
+                        Löschen
+                      </Button>
+                    </Grid>
+                  </>
+                ) : (
+                  <>
+                    {isEdit ? (
+                      <Grid item>
+                        <Button
+                          disabled={loading}
+                          variant="contained"
+                          onClick={() => setShowConfirmDeletion(true)}
+                        >
+                          <DeleteIcon />
+                        </Button>
+                      </Grid>
+                    ) : null}
+                    <Grid item>
+                      <Button
+                        disabled={loading}
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                      >
+                        Speichern
+                      </Button>
+                    </Grid>
+                  </>
+                )}
+              </Grid>
+            </Box>
           </Grid>
         </Grid>
       </form>
