@@ -6,16 +6,20 @@ import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { api } from "common/api";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { SightTile } from "sight/component";
+import { useSightsOnMap } from "map";
 
 export const TourDetails = () => {
   const { id: tourId } = useParams();
 
+  const { highlightSightOnMap, resetHighlightSightOnMap, setSights } =
+    useSightsOnMap();
+
   const { data: tourResponse } = useQuery(["tours", tourId], () =>
     api.get(`/tours/${tourId}`)
   );
-  const tour = tourResponse?.data;
+  const tour = useMemo(() => tourResponse?.data, [tourResponse]);
 
   const { data: sightsResponse } = useQuery(["sights"], () =>
     api.get("/sights")
@@ -30,10 +34,17 @@ export const TourDetails = () => {
     return obj;
   }, [sightsResponse?.data]);
 
+  useEffect(() => {
+    if (tour?.sights) {
+      setSights(
+        tour.sights.map((sightId) => sightsMap[sightId]).filter(Boolean)
+      );
+    }
+  }, [setSights, tour, sightsMap]);
+
   if (!tour) {
     return null;
   }
-  console.log(tour);
 
   return (
     <Box m={2}>
@@ -43,7 +54,16 @@ export const TourDetails = () => {
       <Grid container spacing={2}>
         {tour.sights.map((sightId) =>
           sightsMap[sightId] ? (
-            <Grid item>
+            <Grid
+              item
+              style={{ flex: 1 }}
+              onMouseEnter={() =>
+                highlightSightOnMap(sightsMap[sightId].properties.id)
+              }
+              onMouseLeave={() =>
+                resetHighlightSightOnMap(sightsMap[sightId].properties.id)
+              }
+            >
               <SightTile sight={sightsMap[sightId]} showMagicOption />
             </Grid>
           ) : null

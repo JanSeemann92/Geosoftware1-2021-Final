@@ -1,3 +1,4 @@
+import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
@@ -6,10 +7,21 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import LinkMUI from "@material-ui/core/Link";
 import { TruncateText } from "component";
+import { api } from "common/api";
 
 export const SightTile = ({ sight, showMagicOption = false }) => {
+  const { id: sightId } = sight.properties;
+
+  const { data: sightInfoRequest, refetch: fetchSightsInfos } = useQuery(
+    ["sight_info"],
+    () => api.get(`/sights/${sightId}/infos`),
+    { enabled: false }
+  );
+
+  const sightInfos = sightInfoRequest?.data;
+
   return (
-    <Box p={1} component={Paper}>
+    <Box p={1} component={Paper} width="100%">
       <Typography variant="h6">{sight.properties.name || "..."}</Typography>
       {sight.properties?.url ? (
         <Box mb={1} width="100%">
@@ -27,11 +39,53 @@ export const SightTile = ({ sight, showMagicOption = false }) => {
       <Typography variant="body2">
         <TruncateText text={sight.properties?.description} />
       </Typography>
+      {sightInfos && sightInfos.sightId === sightId ? (
+        <Box mt={2}>
+          <Grid container>
+            <Grid item xs={8}>
+              <Typography variant="body2">Nächste Bushaltestelle:</Typography>
+              <Box display="flex" height="40px" alignItems="center">
+                <Typography variant="body2">
+                  {sightInfos.busStop?.properties?.lbez || "-"}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="body2">Wetter:</Typography>
+              {sightInfos?.weather?.weather[0] ? (
+                <Grid container direction="row" alignItems="center" spacing={1}>
+                  <Grid item>
+                    <img
+                      alt="current weather"
+                      height="40px"
+                      src={`https://openweathermap.org/img/wn/${sightInfos.weather.weather[0].icon}@2x.png`}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="body2">
+                      {sightInfos.weather.main.temp
+                        .toFixed(1)
+                        .replace(".", ",")}{" "}
+                      C°
+                    </Typography>
+                  </Grid>
+                </Grid>
+              ) : (
+                "-"
+              )}
+            </Grid>
+          </Grid>
+        </Box>
+      ) : null}
       <Box mt={1}>
         <Grid container spacing={1} justifyContent="flex-end">
           {showMagicOption ? (
             <Grid item>
-              <Button aria-label="we will do magic things" variant="outlined">
+              <Button
+                aria-label="we will do magic things"
+                variant="outlined"
+                onClick={fetchSightsInfos}
+              >
                 <MagicStickIcon />
               </Button>
             </Grid>

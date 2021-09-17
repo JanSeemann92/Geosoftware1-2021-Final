@@ -3,6 +3,8 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const MongoClient = require("mongodb").MongoClient;
 const { v4: uuidv4 } = require("uuid");
+const { getNearestBusStop } = require("./api-busradar");
+const { getWeatherByPoint } = require("./api-open-weather");
 
 // loads environment variables from a .env
 require("dotenv").config();
@@ -107,6 +109,17 @@ app.delete("/sights/:id", async (req, res) => {
   const result = await db.collection("sights").deleteOne({ id });
   console.log(result);
   res.json({ id });
+});
+
+app.get("/sights/:id/infos", async (req, res) => {
+  const { id } = req.params;
+  const result = await db.collection("sights").findOne({ id });
+  console.log("sights infos for", result);
+
+  const busStop = await getNearestBusStop(convertDBToGeoJSON(result));
+  const weather = await getWeatherByPoint(busStop);
+
+  res.json({ sightId: id, busStop, weather });
 });
 
 app.post("/tours", async (req, res) => {

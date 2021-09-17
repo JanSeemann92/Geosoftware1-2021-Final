@@ -25,8 +25,18 @@ export const TourList = () => {
             <Grid key={key} item>
               <Box p={1} component={Paper}>
                 <Typography variant="h6">{tour.name || "..."}</Typography>
-                <Grid container alignItems="center">
-                  <Grid item style={{ flex: 1 }}>
+                <Grid container alignItems="baseline">
+                  <Grid
+                    item
+                    component={Typography}
+                    variant="body2"
+                    style={{
+                      flex: 1,
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                    }}
+                  >
                     {tour?.sights?.length || "0"} Sehenswürdigkeit
                     {tour?.sights?.length > 1 ? "en" : ""}
                   </Grid>
