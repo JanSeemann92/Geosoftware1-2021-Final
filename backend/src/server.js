@@ -16,6 +16,11 @@ const app = express();
 app.use(bodyParser.json({ limit: "5mb", type: "application/json" }));
 app.use(cors());
 
+console.log(
+  "process.env.MONGODB_CONNECTION_STRING",
+  process.env.MONGODB_CONNECTION_STRING
+);
+
 let db;
 const start = async () => {
   const mongo = await MongoClient.connect(

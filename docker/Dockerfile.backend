@@ -1,0 +1,14 @@
+FROM node:14-alpine
+
+EXPOSE 9000
+
+WORKDIR /app
+
+# Install dependencies
+COPY backend/package.json backend/package-lock.json ./
+RUN npm ci
+
+COPY backend ./
+
+ENTRYPOINT ["npm", "run"]
+CMD ["start:prod"]
