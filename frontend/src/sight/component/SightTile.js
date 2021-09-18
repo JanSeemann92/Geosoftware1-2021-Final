@@ -1,30 +1,72 @@
-import { useQuery } from "react-query";
+import { useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "react-query";
 import { Link } from "react-router-dom";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
+import ButtonBase from "@material-ui/core/ButtonBase";
 import Typography from "@material-ui/core/Typography";
 import LinkMUI from "@material-ui/core/Link";
+import EditIcon from "@material-ui/icons/Edit";
 import { TruncateText } from "component";
 import { api } from "common/api";
+import { useMap } from "map";
 
-export const SightTile = ({ sight, showMagicOption = false }) => {
+export const SightTile = ({
+  sight,
+  showMagicOption = false,
+  showEdit = false,
+  showLink = false,
+  showFullText = false,
+  disableButton = false,
+}) => {
+  const queryClient = useQueryClient();
+  const { map } = useMap();
   const { id: sightId } = sight.properties;
 
-  const { data: sightInfoRequest, refetch: fetchSightsInfos } = useQuery(
-    ["sight_info"],
-    () => api.get(`/sights/${sightId}/infos`),
-    { enabled: false }
-  );
+  const busStopLayer = useRef(null);
+
+  const {
+    data: sightInfoRequest,
+    refetch: fetchSightsInfos,
+    remove: removeSightInfos,
+  } = useQuery(["sight_info"], () => api.get(`/sights/${sightId}/infos`), {
+    enabled: false,
+  });
 
   const sightInfos = sightInfoRequest?.data;
 
-  return (
-    <Box p={1} component={Paper} width="100%">
+  const showMagicThings = () => {
+    if (sightInfos && sightInfos.sightId === sightId) {
+      removeSightInfos();
+      queryClient.refetchQueries();
+    } else {
+      fetchSightsInfos();
+    }
+  };
+
+  useEffect(() => {
+    if (sightInfos && sightInfos.sightId === sightId) {
+      busStopLayer.current = new window.L.FeatureGroup();
+      map.addLayer(busStopLayer.current);
+      const geoJsonLayer = window.L.geoJson(sightInfos.busStop);
+      busStopLayer.current.addLayer(geoJsonLayer);
+      map.fitBounds(busStopLayer.current.getBounds(), { maxZoom: 17 });
+    }
+    return () => {
+      if (busStopLayer.current) {
+        busStopLayer.current.clearLayers();
+        map.removeLayer(busStopLayer.current);
+      }
+    };
+  }, [map, sightInfos, sightId]);
+
+  const content = (
+    <Box p={1}>
       <Typography variant="h6">{sight.properties.name || "..."}</Typography>
-      {sight.properties?.url ? (
-        <Box mb={1} width="100%">
+      {showLink && sight.properties?.url ? (
+        <Box mb={1} mt={1} width="100%">
           <LinkMUI
             href={sight.properties.url}
             target="_blank"
@@ -32,14 +74,20 @@ export const SightTile = ({ sight, showMagicOption = false }) => {
             variant="body2"
             underline="always"
           >
-            {decodeURI(sight.properties.url)}
+            Weitere Informationen
           </LinkMUI>
         </Box>
       ) : null}
-      <Typography variant="body2">
-        <TruncateText text={sight.properties?.description} />
-      </Typography>
-      {sightInfos && sightInfos.sightId === sightId ? (
+      <Box mt={1}>
+        <Typography variant="body2">
+          {showFullText ? (
+            sight.properties?.description || ""
+          ) : (
+            <TruncateText text={sight.properties?.description} />
+          )}
+        </Typography>
+      </Box>
+      {showMagicOption && sightInfos && sightInfos.sightId === sightId ? (
         <Box mt={2}>
           <Grid container>
             <Grid item xs={8}>
@@ -77,42 +125,53 @@ export const SightTile = ({ sight, showMagicOption = false }) => {
           </Grid>
         </Box>
       ) : null}
-      <Box mt={1}>
+    </Box>
+  );
+
+  return (
+    <Box component={disableButton ? null : Paper} width="100%">
+      {disableButton ? (
+        content
+      ) : (
+        <ButtonBase
+          to={`/sights/${sight.properties.id}`}
+          component={Link}
+          style={{ width: "100%", justifyContent: "flex-start" }}
+        >
+          {content}
+        </ButtonBase>
+      )}
+      {showMagicOption || showEdit ? (
         <Grid container spacing={1} justifyContent="flex-end">
-          {showMagicOption ? (
+          {showEdit ? (
             <Grid item>
-              <Button
-                aria-label="we will do magic things"
-                variant="outlined"
-                onClick={fetchSightsInfos}
-              >
-                <MagicStickIcon />
-              </Button>
+              <Box mb={1}>
+                <Button
+                  aria-label="edit sight"
+                  variant="outlined"
+                  component={Link}
+                  to={`/sights/${sight.properties.id}/edit`}
+                >
+                  <EditIcon />
+                </Button>
+              </Box>
             </Grid>
           ) : null}
-          <Grid item>
-            <Link
-              component={Button}
-              to={`/sights/${sight.properties.id}/edit`}
-              aria-label="edit sight"
-              variant="outlined"
-            >
-              Bearbeiten
-            </Link>
-          </Grid>
-          <Grid item>
-            <Link
-              component={Button}
-              to={`/sights/${sight.properties.id}`}
-              aria-label="show sight details"
-              variant="contained"
-              color="secondary"
-            >
-              Details
-            </Link>
-          </Grid>
+          {showMagicOption ? (
+            <Grid item>
+              <Box mx={1} mb={1}>
+                <Button
+                  aria-label="we will do magic things"
+                  variant="outlined"
+                  onClick={showMagicThings}
+                >
+                  <MagicStickIcon />
+                </Button>
+              </Box>
+            </Grid>
+          ) : null}
         </Grid>
-      </Box>
+      ) : null}
     </Box>
   );
 };

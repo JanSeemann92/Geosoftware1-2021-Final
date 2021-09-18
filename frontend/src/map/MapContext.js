@@ -28,7 +28,7 @@ export const MapProvider = ({ children }) => {
     }
 
     const map = window.L.map(ref, {
-      center: [52.677, 8.431297],
+      center: [51.960505, 7.626343],
       zoom: 11,
       layers: [window.L.tileLayer(HERE_TILE_URL)],
     });

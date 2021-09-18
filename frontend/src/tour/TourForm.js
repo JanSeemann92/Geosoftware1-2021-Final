@@ -86,7 +86,7 @@ export const TourForm = () => {
   );
 
   return (
-    <Box m={2}>
+    <Box m={2} pb={12}>
       <Box mb={2}>
         <Typography variant="h6">
           Tour {isEdit ? "bearbeiten" : "erstellen"}

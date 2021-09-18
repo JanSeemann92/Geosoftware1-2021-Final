@@ -15,6 +15,7 @@ import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { api } from "common/api";
 import { useMap } from "map";
+import { useApp } from "app";
 
 const sightInitialValues = {
   type: "Feature",
@@ -28,7 +29,10 @@ const sightInitialValues = {
 export const SightForm = () => {
   const { id: sightId } = useParams();
   const history = useHistory();
+
   const { map, drawControl } = useMap();
+  const { setShowMap } = useApp(false);
+
   const [error, setError] = useState("");
   const [showGeometryInput, setShowGeometryInput] = useState(false);
   const [geometryTextInput, setGeometryTextInput] = useState("");
@@ -145,10 +149,11 @@ export const SightForm = () => {
 
       // add to map
       drawnItems.current.addLayer(layer);
+      setShowMap(false);
       // add to formik
       formikSetFieldValue("geometry", geometry);
     });
-  }, [map, formikSetFieldValue]);
+  }, [map, formikSetFieldValue, setShowMap]);
 
   useEffect(() => {
     return () => {
@@ -165,6 +170,7 @@ export const SightForm = () => {
     drawnItems.current.clearLayers();
 
     new window.L.Draw.Marker(map, drawControl.options.marker).enable();
+    setShowMap(true);
   };
 
   const drawPolygon = () => {
@@ -174,6 +180,7 @@ export const SightForm = () => {
     drawnItems.current.clearLayers();
 
     new window.L.Draw.Polygon(map, drawControl.options.polygon).enable();
+    setShowMap(true);
   };
 
   const onUploadGeoJson = (e) => {
@@ -256,7 +263,7 @@ export const SightForm = () => {
   console.log("rerender?");
 
   return (
-    <Box m={2}>
+    <Box m={2} pb={12}>
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         open={Boolean(error)}

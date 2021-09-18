@@ -1,10 +1,10 @@
 import { useQuery } from "react-query";
 import { Link, useParams } from "react-router-dom";
-import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
-import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import IconButton from "@material-ui/core/IconButton";
+import EditIcon from "@material-ui/icons/Edit";
 import { api } from "common/api";
 import { useEffect, useMemo } from "react";
 import { SightTile } from "sight/component";
@@ -49,14 +49,23 @@ export const TourDetails = () => {
   return (
     <Box m={2}>
       <Box mb={2}>
-        <Typography variant="h6">{tour.name}</Typography>
+        <Grid container alignItems="center">
+          <Box flex={1}>
+            <Typography variant="h6">{tour.name}</Typography>
+          </Box>
+          <Box>
+            <IconButton component={Link} to={`/tours/${tour.id}/edit`}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Grid>
       </Box>
       <Grid container spacing={2}>
         {tour.sights.map((sightId) =>
           sightsMap[sightId] ? (
             <Grid
               item
-              style={{ flex: 1 }}
+              xs={12}
               onMouseEnter={() =>
                 highlightSightOnMap(sightsMap[sightId].properties.id)
               }
