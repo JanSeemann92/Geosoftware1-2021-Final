@@ -1,19 +1,71 @@
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
+import TextField from "@material-ui/core/TextField";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
 import ButtonBase from "@material-ui/core/ButtonBase";
 import Typography from "@material-ui/core/Typography";
 import { api } from "common/api";
 
 export const TourList = () => {
-  const { data: tourResponse } = useQuery("tours", () => api.get("/tours"));
+  const searchTimeout = useRef();
+  const [search, setSearch] = useState("");
+  const [searchParam, setSearchParam] = useState("");
+
+  const { data: tourResponse } = useQuery(["tours", searchParam], () =>
+    api.get(`/tours${searchParam ? `?search=${searchParam}` : ""}`)
+  );
 
   const tours = tourResponse?.data || [];
 
+  useEffect(() => {
+    searchTimeout.current = setTimeout(() => {
+      setSearchParam(search);
+    }, 700);
+
+    return () => {
+      clearTimeout(searchTimeout.current);
+    };
+  }, [search, setSearchParam]);
+
+  const updateSearch = useCallback((e) => {
+    setSearch(e.target.value);
+  }, []);
+
+  const clearSearch = useCallback(
+    (e) => {
+      setSearch("");
+      setSearchParam("");
+    },
+    [setSearch, setSearchParam]
+  );
+
   return (
     <Box m={2} pt={1} pb={12}>
+      <Box mb={2}>
+        <TextField
+          variant="outlined"
+          fullWidth
+          type="text"
+          placeholder="Tour suchen..."
+          value={search}
+          onChange={updateSearch}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={clearSearch}>
+                  <CloseIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
       <Grid container direction="column" spacing={2}>
         {Array.isArray(tours) &&
           tours.map((tour, key) => (
