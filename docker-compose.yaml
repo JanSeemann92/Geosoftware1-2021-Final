@@ -1,9 +1,7 @@
 version: "3.9"
 services:
   frontend:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.frontend
+    image: nschnierer/geosoft1-final-frontend
     environment:
       - NODE_ENV=production
     ports:
@@ -13,9 +11,7 @@ services:
     depends_on:
       - mongodb
   backend:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.backend
+    image: nschnierer/geosoft1-final-backend
     environment:
       - NODE_ENV=production
       - OPENWEATHERMAP_API_KEY=123456
