@@ -1,6 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMap } from "map";
 
+const FEATURE_COLOR_DEFAULT = "#008BB5";
+const FEATURE_COLOR_ACTIVE = "#F50057";
+const markerHtmlStyles = (bgColor) => `
+  background-color: ${bgColor};
+  width: 1.2rem;
+  height: 1.2rem;
+  display: block;
+  left: -0.6rem;
+  top: -0.6rem;
+  position: relative;
+  border-radius: 3rem 3rem 0;
+  transform: rotate(45deg);
+  border: 1px solid #FFFFFF`;
+
+const CUSTOM_MARKER_CLASSNAME = "leaflet-custom-marker-icon";
+
 export const useSightsOnMap = () => {
   const { map, setPopup } = useMap();
   const mapLayer = useRef(null);
@@ -43,12 +59,24 @@ export const useSightsOnMap = () => {
   }, [setPopup]);
 
   useEffect(() => {
-    if (Array.isArray(sights) && sights.length > 0 && mapLayer.current) {
+    if (map && Array.isArray(sights) && sights.length > 0 && mapLayer.current) {
       mapLayer.current.clearLayers();
       mapSights.current = {};
+
       sights.forEach((sight) => {
+        const customMarkerIcon = window.L.divIcon({
+          className: `${CUSTOM_MARKER_CLASSNAME}-${sight.properties.id}`,
+          iconAnchor: [0, 24],
+          labelAnchor: [-6, 0],
+          popupAnchor: [0, -36],
+          html: `<span style="${markerHtmlStyles(FEATURE_COLOR_DEFAULT)}" />`,
+        });
+
         mapSights.current[sight.properties.id] = window.L.geoJson(sight, {
-          style: { color: "blue" },
+          pointToLayer: (feature, { lat, lng }) => {
+            return window.L.marker([lat, lng], { icon: customMarkerIcon });
+          },
+          style: { color: FEATURE_COLOR_DEFAULT },
         });
         mapLayer.current.addLayer(mapSights.current[sight.properties.id]);
       });
@@ -58,13 +86,29 @@ export const useSightsOnMap = () => {
 
   const highlightSightOnMap = useCallback((id) => {
     if (mapSights.current[id]) {
-      mapSights.current[id].setStyle({ color: "red" });
+      mapSights.current[id].setStyle({
+        color: FEATURE_COLOR_ACTIVE,
+      });
+      const iconElem = document.querySelector(
+        `.${CUSTOM_MARKER_CLASSNAME}-${id} span`
+      );
+      if (iconElem) {
+        iconElem.style.background = FEATURE_COLOR_ACTIVE;
+      }
     }
   }, []);
 
   const resetHighlightSightOnMap = useCallback((id) => {
     if (mapSights.current[id]) {
-      mapSights.current[id].setStyle({ color: "blue" });
+      mapSights.current[id].setStyle({
+        color: FEATURE_COLOR_DEFAULT,
+      });
+      const iconElem = document.querySelector(
+        `.${CUSTOM_MARKER_CLASSNAME}-${id} span`
+      );
+      if (iconElem) {
+        iconElem.style.background = FEATURE_COLOR_DEFAULT;
+      }
     }
   }, []);
 

@@ -1,50 +1,129 @@
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
+import Fab from "@material-ui/core/Fab";
+import MapIcon from "@material-ui/icons/Map";
+import CloseIcon from "@material-ui/icons/Close";
 import { TourRoutes } from "../tour";
 import { SightRoutes } from "../sight";
 import { AppBar } from "./AppBar";
 import { Map } from "map";
+import { CreateResource } from "./CreateResource";
+import { useApp } from "app";
+import { About } from "./About";
 
 const useStyles = makeStyles((theme) => ({
   main: {
-    position: "absolute",
-    top: "48px",
-    right: 0,
-    bottom: 0,
-    left: 0,
     display: "flex",
-    flexDirection: "row",
+    width: "100%",
+    height: "100vh",
   },
-  scroll: {
+  content: {
+    flex: 1,
     position: "relative",
-    height: "100%",
-    overflowY: "scroll",
+    overflowY: "auto",
+    // AppBar height
+    marginTop: "47px",
+    [theme.breakpoints.down("md")]: {
+      flex: "none",
+      position: "static",
+      overflowY: "visible",
+      width: "100%",
+      // AppBar height
+      marginTop: "87px",
+    },
+  },
+  contentHide: {
+    [theme.breakpoints.down("md")]: {
+      display: "none",
+    },
+  },
+  map: {
+    flex: 2,
+    // AppBar height
+    marginTop: "47px",
+    [theme.breakpoints.down("md")]: {
+      flex: 1,
+      marginTop: "87px",
+    },
+  },
+  mapInner: {
+    paddingTop: "47px",
+    [theme.breakpoints.down("md")]: {
+      paddingTop: "87px",
+    },
+  },
+  actionButton: {
+    display: "none",
+    position: "fixed",
+    bottom: theme.spacing(1),
+    left: theme.spacing(2),
+    [theme.breakpoints.down("md")]: {
+      display: "block",
+    },
   },
 }));
 
 export const App = () => {
   const classes = useStyles();
+  const { showMap, setShowMap } = useApp(false);
 
   return (
     <Router>
       <AppBar />
       <main className={classes.main}>
-        <Grid item xs={4}>
-          <div className={classes.scroll}>
-            <Switch>
-              <Route path="/sights">
-                <SightRoutes />
-              </Route>
-              <Route path="/">
-                <TourRoutes />
-              </Route>
-            </Switch>
+        <div
+          className={`${classes.content}${
+            showMap ? ` ${classes.contentHide}` : ""
+          }`}
+        >
+          <Switch>
+            <Route path="/about">
+              <About />
+            </Route>
+            <Route path="/create">
+              <CreateResource />
+            </Route>
+            <Route path="/sights">
+              <SightRoutes />
+            </Route>
+            <Route path="/">
+              <TourRoutes />
+            </Route>
+          </Switch>
+        </div>
+        <div className={classes.map}>
+          <div
+            className={classes.mapInner}
+            style={{
+              position: "fixed",
+              width: "100%",
+              height: "100%",
+              top: 0,
+            }}
+          >
+            <Map />
           </div>
-        </Grid>
-        <Grid item xs={8}>
-          <Map />
-        </Grid>
+        </div>
+        <div className={classes.actionButton}>
+          <Fab
+            variant="extended"
+            size="large"
+            aria-label="show map"
+            onClick={() => setShowMap(!showMap)}
+          >
+            {showMap ? (
+              <>
+                <CloseIcon />
+                &nbsp;&nbsp;Karte ausblenden
+              </>
+            ) : (
+              <>
+                <MapIcon />
+                &nbsp;&nbsp;Karte einblenden
+              </>
+            )}
+          </Fab>
+        </div>
       </main>
     </Router>
   );

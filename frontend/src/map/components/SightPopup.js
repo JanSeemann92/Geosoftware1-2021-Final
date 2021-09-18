@@ -1,8 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "react-query";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
 import Box from "@material-ui/core/Box";
-import LinkMUI from "@material-ui/core/Link";
+import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { api } from "common/api";
 
@@ -32,22 +33,21 @@ export const SightPopup = ({ id = "" }) => {
   return (
     <div className={classes.popupWrapper}>
       <Typography variant="h6">{sight.properties.name}</Typography>
-      {sight.properties?.url ? (
-        <Box mb={1} width="100%">
-          <LinkMUI
-            href={sight.properties.url}
-            target="_blank"
-            color="inherit"
-            variant="body2"
-            underline="always"
-          >
-            {decodeURI(sight.properties.url)}
-          </LinkMUI>
-        </Box>
-      ) : null}
-      <Typography variant="body2">
-        {(sight.properties?.description || "").slice(0, 120)}...
-      </Typography>
+      <Box mt={1}>
+        <Typography variant="body2">
+          {(sight.properties?.description || "").slice(0, 120)}...
+        </Typography>
+      </Box>
+      <Box mt={1}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          component={Link}
+          to={`/sights/${sight.properties?.id}`}
+        >
+          Details
+        </Button>
+      </Box>
     </div>
   );
 };

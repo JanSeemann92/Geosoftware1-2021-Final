@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MapProvider } from "map";
+import { AppProvider } from "app";
 
 const queryClient = new QueryClient();
 
@@ -11,11 +12,15 @@ const theme = createTheme({
   },
 });
 
-export const Providers = ({ children }) => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <MapProvider>{children}</MapProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+export const Providers = ({ children }) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <MapProvider>
+          <AppProvider>{children}</AppProvider>
+        </MapProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
