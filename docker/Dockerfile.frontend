@@ -1,0 +1,22 @@
+# Container to build the frontend only
+FROM node:14-alpine as builder
+
+WORKDIR /app
+
+# Install frontend dependencies
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend ./
+RUN npm run build
+
+
+FROM nginx
+
+WORKDIR /etc/nginx
+
+COPY ./docker/nginx/default.conf ./conf.d
+COPY --from=builder /app/build /usr/share/nginx/html
+
+ENTRYPOINT ["nginx"]
+CMD ["-g", "daemon off;"]

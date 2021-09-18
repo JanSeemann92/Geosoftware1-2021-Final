@@ -1,0 +1,49 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "8080:80"
+    networks:
+      - default
+    depends_on:
+      - mongodb
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    environment:
+      - NODE_ENV=production
+      - OPENWEATHERMAP_API_KEY=123456
+      - EXPRESS_PORT=9000
+      - MONGODB_CONNECTION_STRING=mongodb://admin:adminpw@mongodb:27017/geo
+    ports:
+      - "9000:9000"
+    networks:
+      - default
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo
+    container_name: "mongodb"
+    restart: always
+    ports:
+      - "27017-27019:27017-27019"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: toor
+      MONGO_INITDB_DATABASE: geo
+    volumes:
+      - ./docker/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./docker/mongo/volume:/data/db
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
