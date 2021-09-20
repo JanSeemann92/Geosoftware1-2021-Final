@@ -9,7 +9,7 @@ export const CreateResource = () => {
   return (
     <Box m={2} pb={12}>
       <Box mb={2}>
-        <Typography variant="h6">Was möchtes du erstellen?</Typography>
+        <Typography variant="h6">Was möchtest du erstellen?</Typography>
       </Box>
       <Grid container direction="column" spacing={2}>
         <Grid item>

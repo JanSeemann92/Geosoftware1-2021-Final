@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
   },
   map: {
     flex: 2,
+    position: "relative",
     // AppBar height
     marginTop: "47px",
     [theme.breakpoints.down("md")]: {
@@ -47,10 +48,10 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   mapInner: {
-    paddingTop: "47px",
-    [theme.breakpoints.down("md")]: {
-      paddingTop: "87px",
-    },
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    top: 0,
   },
   actionButton: {
     display: "none",
@@ -92,15 +93,7 @@ export const App = () => {
           </Switch>
         </div>
         <div className={classes.map}>
-          <div
-            className={classes.mapInner}
-            style={{
-              position: "fixed",
-              width: "100%",
-              height: "100%",
-              top: 0,
-            }}
-          >
+          <div className={classes.mapInner}>
             <Map />
           </div>
         </div>
