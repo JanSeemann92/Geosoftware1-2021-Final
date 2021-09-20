@@ -1,7 +1,15 @@
+import { useEffect } from "react";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
+import { useApp } from "app";
 
 export const About = () => {
+  const { setShowMap } = useApp();
+
+  useEffect(() => {
+    setShowMap(false);
+  }, [setShowMap]);
+
   return (
     <Box m={2} pb={12}>
       <Box mb={2}>

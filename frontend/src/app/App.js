@@ -52,6 +52,10 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     height: "100%",
     top: 0,
+    [theme.breakpoints.down("md")]: {
+      position: "fixed",
+      paddingTop: "87px",
+    },
   },
   actionButton: {
     display: "none",
